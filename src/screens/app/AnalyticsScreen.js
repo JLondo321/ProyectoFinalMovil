@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../../styles/AnalyticsStyles';
-
 // Este componente sería para mostrar las estadísticas en cajas individuales
 const StatBox = ({ title, value, icon, color }) => {
   return (
