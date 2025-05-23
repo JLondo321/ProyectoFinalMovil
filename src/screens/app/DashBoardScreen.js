@@ -7,20 +7,20 @@ import DashboardStyles from '../../styles/DashboardStyles';
 import BalanceCard from '../../components/BalanceCard';
 import TransactionList from '../../components/TransactionList';
 
-// Datos de prueba
-const summaryData = {
-  balance: 1250000,
-  income: 2000000,
-  expenses: 750000,
-};
-
-const recentTransactions = [
-  { id: 1, title: 'Salario', amount: 2000000, type: 'income', category: 'Trabajo', date: '2023-05-20' },
-  { id: 2, title: 'Supermercado', amount: 250000, type: 'expense', category: 'Alimentación', date: '2023-05-18' },
-  { id: 3, title: 'Pago Arriendo', amount: 500000, type: 'expense', category: 'Vivienda', date: '2023-05-15' },
-];
+// Contexto
+import { useAuth } from '../../utils/context'; // Ajusta la ruta si es distinta
 
 const DashboardScreen = ({ navigation }) => {
+  const { resumen, transacciones } = useAuth(); // Datos obtenidos en login
+
+  if (!resumen) {
+    return (
+      <View style={DashboardStyles.container}>
+        <Text>Cargando...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={DashboardStyles.container}>
       {/* Header */}
@@ -32,60 +32,49 @@ const DashboardScreen = ({ navigation }) => {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Balance Card */}
-        <BalanceCard 
-          balance={summaryData.balance}
-          income={summaryData.income}
-          expenses={summaryData.expenses}
+        {/* Balance */}
+        <BalanceCard
+          balance={resumen.balance}
+          income={resumen.income}
+          expenses={resumen.expenses}
         />
 
-        {/* Quick Actions */}
+        {/* Acciones rápidas */}
         <View style={DashboardStyles.actionsContainer}>
           <Text style={DashboardStyles.sectionTitle}>Acciones rápidas</Text>
           <View style={DashboardStyles.actionButtonsContainer}>
-            <TouchableOpacity 
-              style={DashboardStyles.actionButton}
+            <QuickAction
+              label="Nuevo"
+              icon="add-circle-outline"
+              bgColor="#e3f2fd"
+              iconColor="#1976d2"
               onPress={() => navigation.navigate('Nueva Transacción')}
-            >
-              <View style={[DashboardStyles.actionIconContainer, {backgroundColor: '#e3f2fd'}]}>
-                <Ionicons name="add-circle-outline" size={24} color="#1976d2" />
-              </View>
-              <Text style={DashboardStyles.actionText}>Nuevo</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={DashboardStyles.actionButton}
+            />
+            <QuickAction
+              label="Listar"
+              icon="list-outline"
+              bgColor="#e8f5e9"
+              iconColor="#2e7d32"
               onPress={() => navigation.navigate('Transacciones')}
-            >
-              <View style={[DashboardStyles.actionIconContainer, {backgroundColor: '#e8f5e9'}]}>
-                <Ionicons name="list-outline" size={24} color="#2e7d32" />
-              </View>
-              <Text style={DashboardStyles.actionText}>Listar</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={DashboardStyles.actionButton}
+            />
+            <QuickAction
+              label="Categorías"
+              icon="grid-outline"
+              bgColor="#fff3e0"
+              iconColor="#ff9800"
               onPress={() => navigation.navigate('Categorías')}
-            >
-              <View style={[DashboardStyles.actionIconContainer, {backgroundColor: '#fff3e0'}]}>
-                <Ionicons name="grid-outline" size={24} color="#ff9800" />
-              </View>
-              <Text style={DashboardStyles.actionText}>Categorías</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={DashboardStyles.actionButton}
+            />
+            <QuickAction
+              label="Análisis"
+              icon="pie-chart-outline"
+              bgColor="#fce4ec"
+              iconColor="#c2185b"
               onPress={() => navigation.navigate('Análisis')}
-            >
-              <View style={[DashboardStyles.actionIconContainer, {backgroundColor: '#fce4ec'}]}>
-                <Ionicons name="pie-chart-outline" size={24} color="#c2185b" />
-              </View>
-              <Text style={DashboardStyles.actionText}>Análisis</Text>
-            </TouchableOpacity>
+            />
           </View>
         </View>
 
-        {/* Recent Transactions */}
+        {/* Transacciones recientes */}
         <View style={DashboardStyles.transactionsContainer}>
           <View style={DashboardStyles.sectionTitleContainer}>
             <Text style={DashboardStyles.sectionTitle}>Transacciones recientes</Text>
@@ -93,13 +82,13 @@ const DashboardScreen = ({ navigation }) => {
               <Text style={DashboardStyles.viewAllText}>Ver todas</Text>
             </TouchableOpacity>
           </View>
-          
-          <TransactionList transactions={recentTransactions} limit={5} />
+
+          <TransactionList transactions={transacciones.slice(0, 5)} />
         </View>
       </ScrollView>
-      
-      {/*Botón flotante nueva transacción*/}
-      <TouchableOpacity 
+
+      {/* Botón flotante */}
+      <TouchableOpacity
         style={DashboardStyles.fab}
         onPress={() => navigation.navigate('Nueva Transacción')}
       >
@@ -108,5 +97,14 @@ const DashboardScreen = ({ navigation }) => {
     </View>
   );
 };
+
+const QuickAction = ({ label, icon, bgColor, iconColor, onPress }) => (
+  <TouchableOpacity style={DashboardStyles.actionButton} onPress={onPress}>
+    <View style={[DashboardStyles.actionIconContainer, { backgroundColor: bgColor }]}>
+      <Ionicons name={icon} size={24} color={iconColor} />
+    </View>
+    <Text style={DashboardStyles.actionText}>{label}</Text>
+  </TouchableOpacity>
+);
 
 export default DashboardScreen;

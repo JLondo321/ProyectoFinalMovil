@@ -2,27 +2,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../utils/context'; // Asegúrate que la ruta sea correcta
 
-const TransactionItem =({transaction}) =>{
-   //Función para formatear moneda
-   const formatCurrency = (value) => {
+const TransactionItem = ({ transaction }) => {
+  const formatCurrency = (value) => {
     return `$${value.toLocaleString('es-CO')}`;
-   };
+  };
 
-   //Función para formatear la fecha
-   const formatDate=(dateString)=>{
+  const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-CO',{day:'2-digit', month:'short'});
-   };
+    return date.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
+  };
 
-   // Determinar iconos y colores según la categoría y tipo
   const getIconInfo = () => {
     const isIncome = transaction.type === 'income';
     
     let iconName = 'cash-outline';
     let bgColor = isIncome ? '#E8F5E9' : '#FFEBEE';
     let iconColor = isIncome ? '#2E7D32' : '#D32F2F';
-    
+
     switch (transaction.category.toLowerCase()) {
       case 'alimentación':
         iconName = 'fast-food-outline';
@@ -42,7 +40,7 @@ const TransactionItem =({transaction}) =>{
       default:
         iconName = isIncome ? 'arrow-down-outline' : 'arrow-up-outline';
     }
-    
+
     return { iconName, bgColor, iconColor };
   };
 
@@ -53,16 +51,16 @@ const TransactionItem =({transaction}) =>{
       <View style={[styles.categoryIcon, { backgroundColor: bgColor }]}>
         <Ionicons name={iconName} size={20} color={iconColor} />
       </View>
-      
+
       <View style={styles.transactionInfo}>
         <Text style={styles.transactionTitle}>{transaction.title}</Text>
         <Text style={styles.transactionCategory}>{transaction.category}</Text>
       </View>
-      
+
       <View style={styles.transactionDetails}>
-        <Text 
+        <Text
           style={[
-            styles.transactionAmount, 
+            styles.transactionAmount,
             { color: transaction.type === 'income' ? '#2E7D32' : '#D32F2F' }
           ]}
         >
@@ -75,11 +73,26 @@ const TransactionItem =({transaction}) =>{
 };
 
 const TransactionList = ({ transactions, limit }) => {
-  // Si hay un límite, tomar solo ese número de transacciones
-  const displayTransactions = limit ? transactions.slice(0, limit) : transactions;
+  const { user, loading } = useAuth(); // 👈 Aquí accedes al contexto
 
-  // Si no hay transacciones, mostrar mensaje
-  if (transactions.length === 0) {
+  // Si está cargando, mostrar mensaje
+  if (loading) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Ionicons name="time-outline" size={40} color="#999" />
+        <Text style={styles.emptyText}>Cargando transacciones...</Text>
+      </View>
+    );
+  }
+
+  // Filtrar por usuario si es necesario
+  const userTransactions = user
+    ? transactions.filter((t) => t.userId === user.id) // <-- Solo si las transacciones tienen un userId
+    : [];
+
+  const displayTransactions = limit ? userTransactions.slice(0, limit) : userTransactions;
+
+  if (userTransactions.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Ionicons name="documents-outline" size={40} color="#ccc" />

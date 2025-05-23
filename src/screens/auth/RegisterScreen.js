@@ -12,30 +12,62 @@ const RegisterScreen =({navigation}) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState(null);
+  const [mensajeExito, setMensajeExito] = useState('');
+
  
-  const handleRegister = () => {
-    if (!nombre || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Por favor, complete todos los campos');
+  const handleRegister = async (e) => {
+  e.preventDefault();
+    setError(null); // Limpiar errores
+    setMensajeExito(''); // Limpiar mensajes anteriores
+
+  //validaciones
+  if (!nombre || !email || !password || !confirmPassword) {
+    Alert.alert('Error', 'Por favor, complete todos los campos');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    Alert.alert('Error', 'Las contraseñas no coinciden');
+    return;
+  }
+  
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expresión regular para validar el correo
+    if (!emailRegex.test(email)) {
+      setError('Por favor, introduce un correo electrónico válido.');
       return;
     }
-  
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return;
-    }
-  
-    // Si todo está bien, mostramos el mensaje de éxito
-    Alert.alert(
-      'Registro Exitoso',
-      'Tu cuenta ha sido creada correctamente',
-      [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Login')
-        }
-      ]
-    );
-  };
+
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nombre,
+        email,
+        password,
+      }),
+    });
+
+    const data = await response.json();
+    console.log('DATA:', data);
+    console.log('STATUS:', response.status);
+
+   if (response.status === 200 || response.status === 201) {
+  Alert.alert('Registro Exitoso', data.message || 'Tu cuenta ha sido creada correctamente');
+  navigation.navigate('Login'); // navegar inmediatamente después
+
+} else {
+  Alert.alert('Error', data.message || 'No se pudo registrar el usuario');
+}
+  } catch (error) {
+    console.error('Error en el registro:', error);
+    Alert.alert('Error', 'Hubo un problema al conectar con el servidor');
+  }
+};
+
   
 return(
   <ScrollView style ={RegisterStyles.container}>
