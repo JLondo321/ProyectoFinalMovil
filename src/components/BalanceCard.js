@@ -3,11 +3,14 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+
+
 const BalanceCard = ({ balance = 0, income = 0, expenses = 0 }) => {
-  const formatCurrency = (value) => {
-    if (value == null || isNaN(value)) return '$0';
-    return `$${value.toLocaleString('es-CO')}`;
-  };
+ const formatCurrency = (value) => {
+  const number = parseFloat(value);
+  if (isNaN(number)) return '$0';
+  return `$${number.toLocaleString('es-CO')}`;
+};
 
   return (
     <View style={styles.container}>

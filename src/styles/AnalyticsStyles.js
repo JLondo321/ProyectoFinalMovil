@@ -1,119 +1,120 @@
 import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
-  container: {
+const AnalyticsStyles = StyleSheet.create({
+ container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    padding: 20,
   },
   loadingText: {
-    marginTop: 10,
+    textAlign: 'center',
+    marginTop: 50,
     fontSize: 16,
-    color: '#2E7D32',
+    color: '#666',
   },
-  header: {
-    padding: 20,
-    backgroundColor: '#2E7D32',
-  },
-  headerTitle: {
+  headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    marginBottom: 20,
+    color: '#333',
+    textAlign: 'center',
   },
-  headerSubtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginTop: 5,
-  },
-  statsContainer: {
+  cardRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 10,
+    marginBottom: 20,
   },
-  statBox: {
+  card: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 15,
-    margin: 5,
+    marginHorizontal: 5,
+    alignItems: 'flex-start', // Alinea el contenido a la izquierda
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    elevation: 2,
+    elevation: 3,
   },
-  statHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
+  cardIcon: {
+    marginBottom: 5,
+    // No necesitamos alignSelf: 'flex-start' si el contenedor ya es flex-start
   },
-  statTitle: {
+  cardTitle: {
     fontSize: 14,
-    marginLeft: 8,
-    color: '#666',
+    color: '#777',
+    marginBottom: 5,
   },
-  statValue: {
+  cardValue: {
     fontSize: 20,
     fontWeight: 'bold',
   },
-  sectionTitle: {
+  cardValueGreen: {
+    color: '#2E7D32', // Un verde para ingresos
+  },
+  cardValueRed: {
+    color: '#D32F2F', // Un rojo para gastos
+  },
+  cardValueBlue: {
+    color: '#03A9F4', // Un azul para ahorro
+  },
+  cardValueDefault: {
+    color: '#333', // Color por defecto para otros valores
+  },
+  categorySection: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  categorySectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
     color: '#333',
-  },
-  categoriesContainer: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
-    margin: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    flexDirection: 'row', // Para alinear icono y texto en el título
+    alignItems: 'center',
   },
   categoryItem: {
     marginBottom: 15,
   },
   categoryHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  categoryDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
+    justifyContent: 'space-between',
+    marginBottom: 5,
   },
   categoryName: {
     fontSize: 16,
+    color: '#444',
+    fontWeight: '500',
+  },
+  categoryAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#333',
   },
-  categoryValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginTop: 5,
-    color: '#555',
-  },
-  progressBarContainer: {
-    height: 6,
+  progressBarBackground: {
+    height: 8,
     backgroundColor: '#e0e0e0',
-    borderRadius: 3,
-    marginTop: 8,
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 5,
   },
-  progressBar: {
+  progressBarFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 5,
   },
   categoryPercentage: {
     fontSize: 12,
-    color: '#888',
-    alignSelf: 'flex-end',
-    marginTop: 2,
+    color: '#666',
+    textAlign: 'right',
   },
 });
+
+export default AnalyticsStyles;

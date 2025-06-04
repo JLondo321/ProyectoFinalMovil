@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect, useCallback} from 'react';
+import { View, Text, TouchableOpacity,Alert, ScrollView } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DashboardStyles from '../../styles/DashboardStyles';
 
@@ -11,7 +12,43 @@ import TransactionList from '../../components/TransactionList';
 import { useAuth } from '../../utils/context'; // Ajusta la ruta si es distinta
 
 const DashboardScreen = ({ navigation }) => {
-  const { resumen, transacciones } = useAuth(); // Datos obtenidos en login
+  const { token } = useAuth();
+  const { transacciones } = useAuth(); // Datos obtenidos en login
+  const [resumen, setResumen] = useState({
+    ingresos_totales: 0,
+    egresos_totales: 0,
+    saldo_disponible: 0,
+  });
+
+  useFocusEffect(
+  useCallback(() => {
+    const fetchResumen = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/users/user', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('No se pudo cargar el resumen');
+        const data = await response.json();
+
+        const resumenConvertido = {
+          ingresos_totales: parseFloat(data.resumen.ingresos_totales),
+          egresos_totales: parseFloat(data.resumen.egresos_totales),
+          saldo_disponible: parseFloat(data.resumen.saldo_disponible),
+        };
+
+        console.log('Resumen formateado:', resumenConvertido);
+        setResumen(resumenConvertido);
+      } catch (error) {
+        Alert.alert('Error', error.message);
+      }
+    };
+
+    fetchResumen();
+  }, [token])
+);
 
   if (!resumen) {
     return (
@@ -34,9 +71,9 @@ const DashboardScreen = ({ navigation }) => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Balance */}
         <BalanceCard
-          balance={resumen.balance}
-          income={resumen.income}
-          expenses={resumen.expenses}
+        balance={resumen.saldo_disponible}
+        income={resumen.ingresos_totales}
+        expenses={resumen.egresos_totales}
         />
 
         {/* Acciones rápidas */}
@@ -82,8 +119,8 @@ const DashboardScreen = ({ navigation }) => {
               <Text style={DashboardStyles.viewAllText}>Ver todas</Text>
             </TouchableOpacity>
           </View>
+         <TransactionList transactions={transacciones} limit={5} />
 
-          <TransactionList transactions={transacciones.slice(0, 5)} />
         </View>
       </ScrollView>
 

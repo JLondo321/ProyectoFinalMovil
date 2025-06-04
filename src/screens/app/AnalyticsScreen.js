@@ -1,122 +1,175 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, ScrollView, Alert } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { styles } from '../../styles/AnalyticsStyles';
-// Este componente sería para mostrar las estadísticas en cajas individuales
-const StatBox = ({ title, value, icon, color }) => {
-  return (
-    <View style={styles.statBox}>
-      <View style={styles.statHeader}>
-        <Ionicons name={icon} size={24} color={color} />
-        <Text style={styles.statTitle}>{title}</Text>
-      </View>
-      <Text style={[styles.statValue, {color: color}]}>{value}</Text>
-    </View>
-  );
-};
+import { useAuth } from '../../utils/context';
+import AnalyticsStyles from '../../styles/AnalyticsStyles'; // Asegúrate de que esta ruta sea correcta
 
-// Componente para mostrar la distribución de gastos por categoría
-const CategoryDistribution = ({ categories }) => {
+// Componente auxiliar para las barras de progreso de categoría
+const CategoryProgressBar = ({ name, amount, percentage, color }) => {
+  const progressWidth = percentage ? `${Math.min(parseFloat(percentage), 100)}%` : '0%';
+
   return (
-    <View style={styles.categoriesContainer}>
-      <Text style={styles.sectionTitle}>Gasto promedio por categoría</Text>
-      {categories.map((category, index) => (
-        <View key={index} style={styles.categoryItem}>
-          <View style={styles.categoryHeader}>
-            <View style={[styles.categoryDot, {backgroundColor: category.color}]} />
-            <Text style={styles.categoryName}>{category.name}</Text>
-          </View>
-          <Text style={styles.categoryValue}>${category.average}</Text>
-          <View style={styles.progressBarContainer}>
-            <View 
-              style={[
-                styles.progressBar, 
-                {width: `${category.percentage}%`, backgroundColor: category.color}
-              ]} 
-            />
-          </View>
-          <Text style={styles.categoryPercentage}>{category.percentage}%</Text>
-        </View>
-      ))}
+    <View style={AnalyticsStyles.categoryItem}>
+      <View style={AnalyticsStyles.categoryHeader}>
+        <Text style={AnalyticsStyles.categoryName}>{name}</Text>
+        <Text style={AnalyticsStyles.categoryAmount}>${amount}</Text>
+      </View>
+      <View style={AnalyticsStyles.progressBarBackground}>
+        <View style={[AnalyticsStyles.progressBarFill, { width: progressWidth, backgroundColor: color || '#2196F3' }]} />
+      </View>
+      <Text style={AnalyticsStyles.categoryPercentage}>{percentage}%</Text>
     </View>
   );
 };
 
 const AnalyticsScreen = () => {
-  const [loading, setLoading] = useState(true);
-  const [analyticsData, setAnalyticsData] = useState(null);
-  
-  // Simular la carga de datos
-  useEffect(() => {
-    // Aquí se haría la petición a la API para obtener los datos reales
-    // Por ahora usamos datos de ejemplo
-    setTimeout(() => {
-      setAnalyticsData({
-        averageIncome: 1250.00,
-        averageExpense: 850.00,
-        savingsPercentage: 32,
-        incomeExpenseRatio: 1.47,
-        categories: [
-          { name: 'Alimentación', average: 320, percentage: 38, color: '#FF6B6B' },
-          { name: 'Transporte', average: 180, percentage: 21, color: '#4ECDC4' },
-          { name: 'Entretenimiento', average: 150, percentage: 18, color: '#FFD166' },
-          { name: 'Servicios', average: 120, percentage: 14, color: '#118AB2' },
-          { name: 'Otros', average: 80, percentage: 9, color: '#073B4C' }
-        ]
-      });
-      setLoading(false);
-    }, 1500);
-  }, []);
+  const { token } = useAuth();
+  const [promedios, setPromedios] = useState(null);
+  const [categorias, setCategorias] = useState([]);
 
-  if (loading) {
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const [promediosRes, categoriasRes] = await Promise.all([
+            fetch('http://localhost:3000/api/analytics/promedios', {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            fetch('http://localhost:3000/api/analytics/categorias', {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
+
+          if (!promediosRes.ok || !categoriasRes.ok) {
+            throw new Error('Error al cargar los datos de análisis');
+          }
+
+          const promediosData = await promediosRes.json();
+          const categoriasData = await categoriasRes.json();
+
+          // Asegúrate de que 'promediosData' sea un array y tomas el primer elemento
+          setPromedios(promediosData?.[0]); 
+          setCategorias(categoriasData);
+        } catch (error) {
+          console.error(error);
+          Alert.alert('Error', error.message);
+        }
+      };
+
+      fetchData();
+    }, [token])
+  );
+
+  if (!promedios) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2E7D32" />
-        <Text style={styles.loadingText}>Cargando datos de análisis...</Text>
+      <View style={AnalyticsStyles.container}>
+        <Text style={AnalyticsStyles.loadingText}>Cargando análisis...</Text>
       </View>
     );
   }
 
+  const egresos = categorias.filter(c => c.tipo_transaccion === 'egreso');
+  // Si quieres mostrar los ingresos por categoría con el mismo formato, puedes descomentar:
+  const ingresos = categorias.filter(c => c.tipo_transaccion === 'ingreso');
+
+  // Función segura para mostrar números con dos decimales
+  const formatNumber = (num) => {
+    const n = Number(num);
+    return isNaN(n) ? '0.00' : n.toFixed(2);
+  };
+
+  // Para porcentaje que podría ser null o string
+  const formatPercentage = (num) => {
+    const n = Number(num);
+    // Asegurarse de que el porcentaje se muestre como un número entre 0 y 100
+    return isNaN(n) ? '0' : Math.max(0, Math.min(100, n)).toFixed(0); // Redondea para el porcentaje visual
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Análisis Financiero</Text>
-        <Text style={styles.headerSubtitle}>Resumen de tus finanzas</Text>
+    <ScrollView style={AnalyticsStyles.container} showsVerticalScrollIndicator={false}>
+      {/* Título del período */}
+      <Text style={AnalyticsStyles.headerText}>Análisis del periodo: {promedios.periodo}</Text>
+
+      {/* Fila de tarjetas superiores */}
+      <View style={AnalyticsStyles.cardRow}>
+        {/* Promedio de Ingresos */}
+        <View style={AnalyticsStyles.card}>
+          <Ionicons name="cash-outline" size={24} color="#2E7D32" style={AnalyticsStyles.cardIcon} />
+          <Text style={AnalyticsStyles.cardTitle}>Promedio de Ingresos</Text>
+          <Text style={[AnalyticsStyles.cardValue, AnalyticsStyles.cardValueGreen]}>
+            ${formatNumber(promedios.ingresos_mes)}
+          </Text>
+        </View>
+
+        {/* Promedio de Gastos */}
+        <View style={AnalyticsStyles.card}>
+          <Ionicons name="cart-outline" size={24} color="#D32F2F" style={AnalyticsStyles.cardIcon} />
+          <Text style={AnalyticsStyles.cardTitle}>Promedio de Gastos</Text>
+          <Text style={[AnalyticsStyles.cardValue, AnalyticsStyles.cardValueRed]}>
+            ${formatNumber(promedios.egresos_mes)}
+          </Text>
+        </View>
       </View>
 
-      <View style={styles.statsContainer}>
-        <StatBox 
-          title="Promedio de Ingresos" 
-          value={`$${analyticsData.averageIncome}`} 
-          icon="trending-up-outline" 
-          color="#2E7D32"
-        />
-        <StatBox 
-          title="Promedio de Gastos" 
-          value={`$${analyticsData.averageExpense}`} 
-          icon="trending-down-outline" 
-          color="#C62828"
-        />
+      {/* Segunda fila de tarjetas */}
+      <View style={AnalyticsStyles.cardRow}>
+        {/* Porcentaje de Ahorro */}
+        <View style={AnalyticsStyles.card}>
+          <Ionicons name="piggy-bank-outline" size={24} color="#03A9F4" style={AnalyticsStyles.cardIcon} />
+          <Text style={AnalyticsStyles.cardTitle}>Porcentaje de Ahorro</Text>
+          <Text style={[AnalyticsStyles.cardValue, AnalyticsStyles.cardValueBlue]}>
+            {formatPercentage(promedios.porcentaje_ahorro)}%
+          </Text>
+        </View>
+
+        {/* Relación Ingresos/Gastos */}
+        <View style={AnalyticsStyles.card}>
+          <Ionicons name="stats-chart-outline" size={24} color="#757575" style={AnalyticsStyles.cardIcon} />
+          <Text style={AnalyticsStyles.cardTitle}>Relación Ingresos/Gastos</Text>
+          <Text style={[AnalyticsStyles.cardValue, AnalyticsStyles.cardValueDefault]}>
+            {formatNumber(promedios.relacion_ingreso_egreso)}
+          </Text>
+        </View>
       </View>
 
-      <View style={styles.statsContainer}>
-        <StatBox 
-          title="Porcentaje de Ahorro" 
-          value={`${analyticsData.savingsPercentage}%`} 
-          icon="save-outline" 
-          color="#1565C0"
-        />
-        <StatBox 
-          title="Relación Ingresos/Gastos" 
-          value={analyticsData.incomeExpenseRatio.toFixed(2)} 
-          icon="swap-vertical-outline" 
-          color={analyticsData.incomeExpenseRatio > 1 ? "#2E7D32" : "#C62828"}
-        />
+      {/* Gastos promedio por categoría */}
+      <View style={AnalyticsStyles.categorySection}>
+        <Text style={AnalyticsStyles.categorySectionTitle}>
+          <Ionicons name="folder-outline" size={20} color="#757575" style={{ marginRight: 5 }} />
+          Gasto promedio por categoría
+        </Text>
+        {egresos.map((cat) => (
+          <CategoryProgressBar
+            key={cat.id_categoria}
+            name={cat.nombre_categoria}
+            amount={formatNumber(cat.monto_total)}
+            percentage={formatPercentage(cat.porcentaje)}
+            color={cat.color}
+          />
+        ))}
       </View>
 
-      <CategoryDistribution categories={analyticsData.categories} />
+      {/* Si quieres mostrar los ingresos por categoría con el mismo formato, puedes descomentar esto: */}
+      { <View style={AnalyticsStyles.categorySection}>
+        <Text style={AnalyticsStyles.categorySectionTitle}>
+          <Ionicons name="folder-outline" size={20} color="#757575" style={{ marginRight: 5 }} />
+          Ingresos promedio por categoría
+        </Text>
+        {ingresos.map((cat) => (
+          <CategoryProgressBar
+            key={cat.id_categoria}
+            name={cat.nombre_categoria}
+            amount={formatNumber(cat.monto_total)}
+            percentage={formatPercentage(cat.porcentaje)}
+            color={cat.color}
+          />
+        ))}
+      </View>}
+
     </ScrollView>
   );
 };
+
 
 export default AnalyticsScreen;

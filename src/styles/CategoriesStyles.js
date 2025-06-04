@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
+ const CategoriesStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -56,6 +56,7 @@ export const styles = StyleSheet.create({
   categoryName: {
     flex: 1,
     fontSize: 16,
+    marginLeft: 8,
   },
   deleteButton: {
     padding: 8,
@@ -73,15 +74,12 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalView: {
-    width: '80%',
+    width: '85%',
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -101,9 +99,77 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
   },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 8,
+    marginBottom: 4,
+    color: '#333',
+  },
+  dropdown: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  pickerOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  pickerModal: {
+    position: 'absolute',
+    top: '30%',
+    left: '10%',
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    elevation: 10,
+  },
+  pickerGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  pickerColor: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    margin: 8,
+  },
+  pickerGridIcons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  pickerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 8,
+    backgroundColor: '#F0F0F0',
+  },
+  selectedOption: {
+    backgroundColor: '#2E7D32',
+  },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 16,
   },
   button: {
     flex: 1,
@@ -124,3 +190,5 @@ export const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export default CategoriesStyles;

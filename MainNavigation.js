@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; 
+import { useAuth } from './src/utils/context'; 
 
 // Screens - Auth
 import LoginScreen from './src/screens/auth/LoginScreen';
@@ -62,12 +63,21 @@ const BottomTabNavigator = () => {
     );
 };
 
-// Componente de la pantalla de cierre de sesión
+
 const LogoutScreen = ({ navigation, setIsAuthenticated }) => {
-  const handleLogout = () => {
-    // Aquí iría la lógica para cerrar sesión (limpiar tokens, etc.)
-    setIsAuthenticated(false);
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout(); // elimina token y limpia datos del contexto
+      setIsAuthenticated(false); // cambia el estado de autenticación en el componente padre
+      navigation.replace('Stack', { screen: 'Login' })
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      // puedes mostrar una alerta o notificación si quieres
+    }
   };
+
 
   return (
     <View style={styles.container}>
