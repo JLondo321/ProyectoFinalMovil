@@ -79,7 +79,7 @@ const TransactionList = ({ limit }) => {
         try {
           // Realizar las dos peticiones en paralelo
           const [transactionsRes, userRes] = await Promise.all([
-            fetch('http://localhost:3000/api/users/user', { // Suponiendo que esta URL trae también transacciones
+            fetch('http://localhost:3000/api/users/user', { // Esta URL trae también transacciones
               headers: { Authorization: `Bearer ${token}` },
             }),
             fetch('http://localhost:3000/api/users/user', { // Y esta la información del usuario con categorías

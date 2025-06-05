@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import LoginStyles from '../../styles/LoginStyles'; // Asegúrate de que esta ruta sea correcta
+import LoginStyles from '../../styles/LoginStyles'; 
 import { useAuth } from '../../utils/context';
 
 const LoginScreen = ({ navigation, setIsAuthenticated }) => {

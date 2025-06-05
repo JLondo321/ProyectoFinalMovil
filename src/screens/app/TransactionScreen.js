@@ -78,18 +78,6 @@ const TransactionScreen = ({ navigation }) => {
       return;
     }
 
-    // *** VALIDACIÓN ELIMINADA:
-    // const tipoTransaccion = isIncome ? 'ingreso' : 'egreso';
-    // const categoriaSeleccionadaCorrecta = categories.find(
-    //   cat => cat.id_categoria === selectedCategory.id_categoria && cat.tipo_transaccion === tipoTransaccion
-    // );
-    // if (!categoriaSeleccionadaCorrecta) {
-    //   setErrorMessage('La categoría seleccionada no coincide con el tipo de transacción.');
-    //   setIsSaving(false);
-    //   return;
-    // }
-    // *** FIN DE VALIDACIÓN ELIMINADA ***
-
 
     try {
       const response = await fetch('http://localhost:3000/api/transactions/transacciones', {
@@ -125,7 +113,7 @@ const TransactionScreen = ({ navigation }) => {
       setTimeout(() => {
         setSuccessMessage('');
         navigation.goBack();
-      }, 2500);
+      }, 1000);
 
     } catch (error) {
       setErrorMessage(error.message);
@@ -134,12 +122,6 @@ const TransactionScreen = ({ navigation }) => {
       setIsSaving(false);
     }
   };
-
-  // *** LÓGICA DE FILTRADO DE CATEGORÍAS ELIMINADA ***
-  // const filteredCategories = categories.filter(
-  //   cat => cat.tipo_transaccion === (isIncome ? 'ingreso' : 'egreso')
-  // );
-  // *** FIN DE LÓGICA DE FILTRADO ELIMINADA ***
 
   return (
     <View style={TransactionStyles.container}>
@@ -167,8 +149,7 @@ const TransactionScreen = ({ navigation }) => {
               value={isIncome}
               onValueChange={(value) => {
                 setIsIncome(value);
-                // No es necesario resetear selectedCategory si las categorías son las mismas para ambos tipos
-                // setSelectedCategory(null); // Se comenta o elimina si las categorías son universales
+
               }}
               trackColor={{ false: '#D32F2F', true: '#2E7D32' }}
               thumbColor="#fff"
